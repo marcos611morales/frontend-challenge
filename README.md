@@ -1,31 +1,15 @@
-# Technical challenge — Frontend (React + TypeScript)
+# Movimientos — reto técnico Zenfi
 
-Starter repo for the challenge. It ships the bare minimum to get going: **Vite + React + TypeScript**.
-Everything else —styling, libraries, folder structure, state— is up to you.
+Una pantalla que resuelve dos cosas sobre un mes de movimientos bancarios:
 
-The full statement is in [`RETO.md`](./RETO.md).
+1. **Entender en unos 10 segundos en qué se fue el dinero.**
+2. **Corregir la categoría de un movimiento mal clasificado.**
 
-## Your repo
+El enunciado completo está en [`RETO.md`](./RETO.md). El porqué de cada decisión —qué dejé
+fuera y qué encontré en los datos— está en [`DECISIONES.md`](./DECISIONES.md), que se lee en
+una página.
 
-This repo is a **template**. Hit **"Use this template" → "Create a new repository"** and create it
-**under your own account**. The repo is yours and you keep it.
-
-Make it **public** — that way you can deploy it for free anywhere; GitHub Pages, for one, won't
-publish from a private repo without a paid plan. If you'd rather keep it private, that's fine too:
-just invite the two of us as collaborators, `SaulMoreyra` and `JohanAlvarado`.
-
-Work straight on `main`. Commit as you go and push often — make as many commits as you need with
-messages that read, because we look at the history, not just the final state, and if something
-breaks on the last day what's pushed is what exists. Get your first commit up early: that's how we
-timestamp the start of the time-box.
-
-## Requirements
-
-- Node `>=22.12` (there's an `.nvmrc`)
-- pnpm 10 (`corepack enable`). If you'd rather use npm or yarn, go ahead: delete the
-  `packageManager` field from `package.json` and that's it.
-
-## How to run it
+## Cómo se corre
 
 ```bash
 corepack enable
@@ -33,56 +17,66 @@ pnpm install
 pnpm dev
 ```
 
-It runs at http://localhost:5173.
+Queda en http://localhost:5173.
 
-## Scripts
+Requiere **Node >=22.12** (hay un [`.nvmrc`](./.nvmrc)) y **pnpm 10**. Si prefieres npm o yarn,
+borra el campo `packageManager` de `package.json`.
 
-| Script           | What it does                     |
-| ---------------- | -------------------------------- |
-| `pnpm dev`       | Development server               |
-| `pnpm build`     | Typecheck + production build     |
-| `pnpm preview`   | Serves the build                 |
-| `pnpm lint`      | ESLint                           |
-| `pnpm typecheck` | TypeScript only                  |
+| Script           | Qué hace                       |
+| ---------------- | ------------------------------ |
+| `pnpm dev`       | Servidor de desarrollo         |
+| `pnpm build`     | Typecheck + build de producción |
+| `pnpm preview`   | Sirve el build                 |
+| `pnpm lint`      | ESLint                         |
+| `pnpm typecheck` | Sólo TypeScript                |
 
-## The data
+## Qué se ve
 
-`src/data/movimientos.json` — one month of transactions from an account, exactly as it comes
-out of a bank aggregator. **It's deliberately untyped**: modeling and normalizing that data is
-part of the challenge. Import it directly, no backend needed.
+- **Resumen del mes** — ingresos, gasto neto y balance.
+- **Donut de gasto por categoría** — top 5 más "Otros". Cada rebanada filtra la lista, incluida
+  "Otros", que filtra sus 8 categorías de golpe.
+- **Lista paginada** con búsqueda y filtros de cuenta, categoría y tipo, alineados con las
+  columnas que filtran para que hagan de encabezado. Los dos que no corresponden a ninguna
+  columna —estado y qué movimientos cuentan— viven en el encabezado de la página.
+- **Corrección de categoría** en cada renglón. Los totales y el donut se recalculan al instante;
+  las correcciones sobreviven al refresh.
+- **Los movimientos que no cuentan**, visibles con su motivo.
 
-```ts
-import movimientos from './data/movimientos.json';
+## Cómo está armado
+
+```
+src/
+  dominio/      Cero React. Aquí vive todo número que el usuario ve.
+    tipos.ts        El JSON sucio y el modelo limpio, uno frente al otro
+    normalizar.ts   La única frontera entre los dos
+    agregar.ts      Totales y reparto por categoría
+    filtrar.ts      Búsqueda, filtros y paginación
+    correcciones.ts Las correcciones del usuario
+    formato.ts      Moneda y fechas, en un solo lugar
+  hooks/        Lo que recuerda algo entre renders
+  componentes/  JSX, con los datos ya calculados
+  App.tsx       La única capa que conoce las tres
 ```
 
-## What you deliver
+`src/data/movimientos.json` **no se edita**: viene sucio a propósito y arreglar el dato de
+entrada sería esquivar el problema. Todo se corrige en `normalizar.ts`.
 
-1. The code, with this README updated if you change how it's run.
-2. [`DECISIONES.md`](./DECISIONES.md) — one page max. It counts as much as the code.
-3. An email to both of us when you're done, with the link to your repo. That email closes the
-   submission: whatever is on `main` at that point is what we review.
+## El invariante
 
-**Plus: deploy it** (Vercel, Netlify, GitHub Pages, whatever) and send the URL too. Not required and
-it doesn't count against you — but being able to open it without cloning helps.
+Si la normalización está bien, estos números salen. Sirven de prueba de humo:
 
-## What's decided and what isn't
+```
+52 de 61 movimientos · Ingresos $21,650.00 · Gasto neto $84,230.15 · Balance −$62,580.15
+```
 
-Decided (so you don't spend time there):
+Los 9 movimientos restantes no desaparecen: se muestran aparte, cada uno con el motivo por el
+que no cuenta —duplicado, traspaso propio, fuera del periodo, otra moneda, en disputa o sin
+confirmar—. `DECISIONES.md` explica el criterio de cada uno.
 
-- Vite as the build tool, TypeScript in `strict` mode
-- ESLint with the standard Vite + React Hooks config
+## Stack
 
-Not decided (your call, and that's what we'll talk about):
-
-- Styling: plain CSS, Modules, Tailwind, CSS-in-JS, whatever you use
-- State, routing, charts, dates, currency formatting
-- Folder structure and data model
-- What gets shown first and what stays out
-
-## Questions
-
-Something in the statement unclear? Ask — it's not penalized. Email **both addresses in copy**, so
-whoever sees it first can answer:
-
-- saul.aragon@yotepresto.com
-- johan@yotepresto.com
+Vite + React 19 + TypeScript en `strict`, que venían con el template. Encima, sólo **Tailwind
+CSS v4** vía `@tailwindcss/vite` — sin `tailwind.config.js` ni PostCSS. Ni router, ni librería
+de estado, ni de gráficas, ni de fechas: el donut es SVG a mano y las fechas y la moneda salen
+de `Intl`. Con una pantalla y 61 movimientos, cada una de esas dependencias costaba más
+explicarla que escribirla.
