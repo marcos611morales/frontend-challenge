@@ -15,7 +15,7 @@ import type {
   MovimientoCrudo,
   MotivoExclusion,
 } from './tipos';
-import { esCategoria, esEstado, esMoneda } from './tipos';
+import { ESTADOS_SIN_CONFIRMAR, esCategoria, esEstado, esMoneda } from './tipos';
 
 export type Normalizacion = {
   /** El mes que el propio archivo declara. No se infiere de la fecha de hoy. */
@@ -93,9 +93,10 @@ const esTraspasoPropio = (m: DatosMovimiento): boolean =>
   /^PAGO\s+TARJETA\s+DE\s+CR[EÉ]DITO/i.test(m.descripcion);
 
 /**
- * Motivos que se deciden mirando un solo movimiento. El orden importa sólo si uno
- * cumpliera dos reglas; con estos datos ninguno lo hace, y de todos modos gana el motivo
- * más específico, que es el que mejor se explica en pantalla.
+ * Motivos que se deciden mirando un solo movimiento. El orden sí importa en un caso:
+ * `txn_060` está programada Y fuera del periodo. Gana `fuera_de_periodo` porque es la
+ * razón más fundamental —el tablero entero está acotado a 2026-08, y si mañana se cargara
+ * septiembre ese movimiento sí entraría en periodo y caería solo en `no_confirmada`.
  */
 const motivoIndividual = (
   m: DatosMovimiento,
@@ -105,6 +106,7 @@ const motivoIndividual = (
   if (!dentroDelPeriodo(fechaCruda, periodo)) return 'fuera_de_periodo';
   if (m.moneda !== 'MXN') return 'moneda_distinta'; // sin tipo de cambio en los datos
   if (m.estado === 'en_disputa') return 'en_disputa';
+  if (ESTADOS_SIN_CONFIRMAR.includes(m.estado)) return 'no_confirmada';
   if (esTraspasoPropio(m)) return 'traspaso_propio';
   return null;
 };
@@ -118,11 +120,10 @@ const motivoIndividual = (
 const claveDuplicado = (m: DatosMovimiento): string =>
   [m.fecha.getTime(), m.monto, m.cuenta ?? '—', m.descripcion].join('|');
 
-const indicesDuplicados = (datos: DatosMovimiento[], candidatos: Set<number>): Set<number> => {
+const indicesDuplicados = (datos: DatosMovimiento[]): Set<number> => {
   const grupos = new Map<string, number[]>();
 
   datos.forEach((m, i) => {
-    if (!candidatos.has(i)) return;
     const clave = claveDuplicado(m);
     const previos = grupos.get(clave);
     if (previos) previos.push(i);
@@ -160,8 +161,14 @@ export const normalizar = (archivo: ArchivoCrudo): Normalizacion => {
 
   const motivos = datos.map((m, i) => motivoIndividual(m, fechasCrudas[i] ?? '', archivo.periodo));
 
-  const candidatos = new Set(motivos.flatMap((motivo, i) => (motivo === null ? [i] : [])));
-  const duplicados = indicesDuplicados(datos, candidatos);
+  /*
+   * El duplicado se busca sobre todos los movimientos, no sólo sobre los que ya iban a
+   * contar, y gana a cualquier otro motivo. `txn_045` está pendiente Y es copia de
+   * `txn_044`: etiquetarlo "Sin confirmar" haría pensar que es un cargo aparte que
+   * todavía va a llegar, cuando en realidad ya está contado una vez. Su estado real sigue
+   * visible en la etiqueta de al lado.
+   */
+  const duplicados = indicesDuplicados(datos);
 
   const movimientos: Movimiento[] = datos.map((m, i) => {
     const motivo = duplicados.has(i) ? 'duplicado' : motivos[i];

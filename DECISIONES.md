@@ -2,10 +2,10 @@
 
 ## Qué mostré y qué dejé fuera
 
-- El reparto del gasto por encima del detalle: con Vivienda en 56.3%, ese contraste es lo
+- El reparto del gasto por encima del detalle: con Vivienda en 57.6%, ese contraste es lo
   único que se lee en 10 segundos.
 - Donut top 5 + "Otros" en vez de las 13 categorías con gasto: arriba de 6 rebanadas deja de
-  comunicar, y las 8 restantes juntas son 14.4%.
+  comunicar, y las 8 restantes juntas son 14.0%.
 - Fuera la comparativa entre meses y toda serie de tiempo: hay un solo mes, 21 días con
   actividad. Un sparkline de 21 puntos decora, no informa.
 - Fuera presupuestos y proyecciones: exigen supuestos que nadie me dio.
@@ -15,9 +15,9 @@
 ## Supuestos que tuve que inventar
 
 - "Este mes" es el `periodo` que declara el JSON (2026-08), no la fecha de hoy: es el único
-  criterio que el propio archivo define.
-- Un cargo `pendiente` sí entra al gasto, marcado distinto: casi siempre se cobra, y sacarlo
-  subestimaba el mes en $1,909.
+  criterio que el archivo define.
+- Un cargo `pendiente` o `programada` no entra al gasto: puede no liquidarse nunca, y la
+  pantalla responde en qué se fue el dinero, no cuánto van a cobrarte.
 - Un traspaso entre cuentas propias no es gasto, pero un retiro de efectivo sí: el pago de
   tarjeta ya está representado por sus cargos individuales, el retiro no lo está por nada.
 - Las correcciones de categoría viven en `localStorage` guardando solo el diff: sobreviven al
@@ -25,9 +25,9 @@
 
 ## Qué encontré en los datos y cómo lo manejé
 
-- 7 de 61 quedan fuera del total: `txn_010` (traspaso propio), `txn_022` y `txn_045`
-  (duplicados exactos), `txn_032` (USD sin tipo de cambio),
-  `txn_059` y `txn_060` (fuera del periodo), `txn_061` (en disputa). Ninguno se borra: se
+- 9 de 61 quedan fuera del total: traspaso propio (`txn_010`), duplicados (`txn_022`,
+  `txn_045`), USD sin tipo de cambio (`txn_032`), fuera del periodo (`txn_059`, `txn_060`),
+  en disputa (`txn_061`) y sin confirmar (`txn_053`, `txn_056`). Ninguno se borra: se
   muestran aparte con su motivo. Un número que desaparece sin explicación es peor que uno
   incómodo.
 - `txn_024` y `txn_048` son los 2 únicos montos string **y** los 2 únicos sin signo — la

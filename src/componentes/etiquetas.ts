@@ -39,4 +39,5 @@ export const NOMBRE_MOTIVO: Record<MotivoExclusion, string> = {
   moneda_distinta: 'Otra moneda',
   fuera_de_periodo: 'Fuera del mes',
   en_disputa: 'En disputa',
+  no_confirmada: 'Sin confirmar',
 };

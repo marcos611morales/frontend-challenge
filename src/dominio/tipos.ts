@@ -82,9 +82,23 @@ export const MOTIVOS_EXCLUSION = [
   'moneda_distinta',
   'fuera_de_periodo',
   'en_disputa',
+  'no_confirmada',
 ] as const;
 
 export type MotivoExclusion = (typeof MOTIVOS_EXCLUSION)[number];
+
+/**
+ * Estados en los que el dinero todavía no se movió de verdad.
+ *
+ * Un cargo pendiente puede no liquidarse nunca —se cae la autorización, el comercio la
+ * revierte— y uno programado es una intención a futuro. Sumarlos al gasto del mes
+ * responde "cuánto te van a cobrar", no "en qué se te fue el dinero", que es la pregunta
+ * de esta pantalla.
+ *
+ * Va como constante y no como un `if` suelto porque la misma lista la necesitan la regla
+ * de exclusión y cualquiera que después pregunte "¿y por qué éste no cuenta?".
+ */
+export const ESTADOS_SIN_CONFIRMAR: readonly Estado[] = ['pendiente', 'programada'];
 
 // ─── Lo limpio ───────────────────────────────────────────────────────────────
 
