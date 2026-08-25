@@ -10,6 +10,31 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      /*
+       * Resuelve el tema ANTES del primer pintado. Si esto viviera en React, la página
+       * se pintaría clara y saltaría a oscura al hidratar — el parpadeo blanco que hace
+       * ver amateur a cualquier app con modo oscuro.
+       *
+       * Va en línea y sin `type="module"` a propósito: un módulo es diferido y correría
+       * demasiado tarde, que es justo lo que se quiere evitar.
+       */
+      (function () {
+        var tema = 'claro';
+        try {
+          var guardado = localStorage.getItem('zenfi:tema');
+          tema =
+            guardado === 'claro' || guardado === 'oscuro'
+              ? guardado
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'oscuro'
+                : 'claro';
+        } catch (e) {
+          /* Sin storage (modo privado): se cae al tema claro y la app sigue. */
+        }
+        document.documentElement.dataset.tema = tema;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

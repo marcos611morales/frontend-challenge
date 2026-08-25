@@ -78,7 +78,7 @@ export const GraficaCategorias = ({ reparto, seleccion, onSeleccionar }: Props) 
   return (
     <section
       aria-label="Gasto por categoría"
-      className="flex min-h-0 flex-col rounded-xl border border-borde bg-superficie p-4"
+      className="flex min-h-0 flex-col rounded-xl border border-borde bg-superficie p-4 transition-colors"
     >
       <h2 className="text-xs font-semibold uppercase tracking-wide text-tinta-suave">
         En qué se fue

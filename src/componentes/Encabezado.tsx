@@ -1,20 +1,26 @@
 import type { Resumen } from '../dominio/agregar';
 import { formatearPeriodo } from '../dominio/formato';
+import type { Tema } from '../hooks/useTema';
+import { BotonTema } from './BotonTema';
 
 type Props = {
   periodo: string;
   resumen: Resumen;
   correcciones: number;
+  tema: Tema;
   onVerExcluidos: () => void;
   onRestaurar: () => void;
+  onAlternarTema: () => void;
 };
 
 export const Encabezado = ({
   periodo,
   resumen,
   correcciones,
+  tema,
   onVerExcluidos,
   onRestaurar,
+  onAlternarTema,
 }: Props) => {
   const fuera = resumen.movimientosTotales - resumen.movimientosIncluidos;
 
@@ -54,6 +60,8 @@ export const Encabezado = ({
             Ver {fuera} fuera del total
           </button>
         )}
+
+        <BotonTema tema={tema} onAlternar={onAlternarTema} />
       </div>
     </header>
   );

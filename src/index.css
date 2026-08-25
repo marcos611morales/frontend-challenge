@@ -3,14 +3,23 @@
 /*
  * Tokens semánticos, no colores sueltos.
  *
- * Se declaran como variables CSS normales para que el modo oscuro sólo tenga que
- * redefinirlas, y se exponen a Tailwind con `@theme inline` — que emite las utilidades
- * apuntando a la variable en vez de al valor resuelto. Sin `inline`, `bg-superficie`
- * quedaría congelado en el color claro y el modo oscuro no haría nada.
+ * Se exponen a Tailwind con `@theme inline` — que emite las utilidades apuntando a la
+ * variable en vez de al valor resuelto. Sin `inline`, `bg-superficie` quedaría congelado
+ * en el color claro y cambiar de tema no haría nada.
+ *
+ * El tema se elige por atributo (`data-tema`), no por `prefers-color-scheme`, porque el
+ * botón tiene que poder ganarle al sistema. La preferencia del sistema se resuelve una
+ * sola vez, en el script en línea de `index.html`, que escribe el atributo antes del
+ * primer pintado. La alternativa —media query para el sistema y atributo para el
+ * override— obliga a escribir la paleta oscura dos veces, y dos copias de un color es
+ * justo donde una se queda desactualizada.
+ *
+ * `color-scheme` acompaña al tema para que los controles nativos (los `<select>`, la
+ * barra de scroll) no se queden en claro dentro de una pantalla oscura.
  */
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   --lienzo: #f1f5f9;
   --superficie: #ffffff;
@@ -33,33 +42,33 @@
   --cat-3: #d97706;
   --cat-4: #e11d48;
   --cat-5: #0284c7;
-  /* slate-500: el 400 daba 2.56:1 contra la tarjeta blanca y una rebanada es un
-     objeto gráfico — mínimo 3:1, igual que un icono. */
+  /* slate-500: el 400 daba 2.56:1 contra la tarjeta blanca, y una rebanada es un objeto
+     gráfico — mínimo 3:1, igual que un icono. */
   --cat-otros: #64748b;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --lienzo: #0b1220;
-    --superficie: #151e2e;
-    --superficie-suave: #1c2739;
-    --borde: #2a3648;
-    --tinta: #f1f5f9;
-    --tinta-suave: #94a3b8;
-    --tinta-tenue: #64748b;
-    --acento: #fbbf24;
-    --acento-suave: #3a2c10;
+:root[data-tema='oscuro'] {
+  color-scheme: dark;
 
-    --ingreso: #34d399;
-    --gasto: #fb7185;
+  --lienzo: #0b1220;
+  --superficie: #151e2e;
+  --superficie-suave: #1c2739;
+  --borde: #2a3648;
+  --tinta: #f1f5f9;
+  --tinta-suave: #94a3b8;
+  --tinta-tenue: #64748b;
+  --acento: #fbbf24;
+  --acento-suave: #3a2c10;
 
-    --cat-1: #818cf8;
-    --cat-2: #2dd4bf;
-    --cat-3: #fbbf24;
-    --cat-4: #fb7185;
-    --cat-5: #38bdf8;
-    --cat-otros: #64748b;
-  }
+  --ingreso: #34d399;
+  --gasto: #fb7185;
+
+  --cat-1: #818cf8;
+  --cat-2: #2dd4bf;
+  --cat-3: #fbbf24;
+  --cat-4: #fb7185;
+  --cat-5: #38bdf8;
+  --cat-otros: #64748b;
 }
 
 @theme inline {
@@ -109,6 +118,16 @@ body {
 :focus-visible {
   outline: 2px solid var(--acento);
   outline-offset: 2px;
+}
+
+/*
+ * Cambiar de tema sí merece transición —el salto seco de blanco a negro molesta— pero
+ * sólo el fondo de página. Las tarjetas la llevan con `transition-colors` en su propio
+ * componente, que es donde se ve qué elemento la tiene; animar `color` en los 12
+ * renglones de la tabla cuesta más de lo que aporta.
+ */
+body {
+  transition: background-color 200ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

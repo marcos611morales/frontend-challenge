@@ -19,7 +19,7 @@ export const ResumenMes = ({ resumen }: Props) => {
   return (
     <section
       aria-label="Resumen del mes"
-      className="grid grid-cols-3 gap-3 rounded-xl border border-borde bg-superficie px-5 py-4"
+      className="grid grid-cols-3 gap-3 rounded-xl border border-borde bg-superficie px-5 py-4 transition-colors"
     >
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-tinta-suave">Ingresos</p>

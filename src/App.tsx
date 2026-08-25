@@ -14,6 +14,7 @@ import { Paginacion } from './componentes/Paginacion';
 import { ResumenMes } from './componentes/ResumenMes';
 import { useCorrecciones } from './hooks/useCorrecciones';
 import { useFilasVisibles } from './hooks/useFilasVisibles';
+import { useTema } from './hooks/useTema';
 
 /** El JSON es estático: normalizar una vez al cargar el módulo, no en cada render. */
 const { movimientos: originales, periodo } = normalizar(archivo);
@@ -21,6 +22,7 @@ const cuentas = cuentasDe(originales);
 
 const App = () => {
   const { correcciones, corregir, restaurar } = useCorrecciones();
+  const { tema, alternar: alternarTema } = useTema();
   const [criterios, setCriterios] = useState<Criterios>(FILTROS_INICIALES);
   const [pagina, setPagina] = useState(1);
   const [refPanel, filas] = useFilasVisibles(ALTURA_FILA);
@@ -63,8 +65,10 @@ const App = () => {
         periodo={periodo}
         resumen={resumen}
         correcciones={Object.keys(correcciones).length}
+        tema={tema}
         onVerExcluidos={verExcluidos}
         onRestaurar={restaurar}
+        onAlternarTema={alternarTema}
       />
 
       <ResumenMes resumen={resumen} />
@@ -78,7 +82,7 @@ const App = () => {
 
         <section
           aria-label="Movimientos"
-          className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] rounded-xl border border-borde bg-superficie"
+          className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] rounded-xl border border-borde bg-superficie transition-colors"
         >
           <Filtros
             criterios={criterios}
