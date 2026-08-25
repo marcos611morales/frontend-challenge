@@ -72,8 +72,13 @@ export type Rebanada = {
 
 export type Reparto = {
   rebanadas: Rebanada[];
-  /** Las categorías que no cupieron en el top, agrupadas. `null` si todas cupieron. */
-  otros: { monto: number; porcentaje: number; categorias: number } | null;
+  /**
+   * Las categorías que no cupieron en el top, agrupadas. `null` si todas cupieron.
+   *
+   * Lleva la lista de categorías y no sólo cuántas son porque la rebanada "Otros" se
+   * puede pulsar para filtrar la lista por todas ellas — con un número no se podría.
+   */
+  otros: { monto: number; porcentaje: number; categorias: (Categoria | null)[] } | null;
   total: number;
 };
 
@@ -120,7 +125,11 @@ export const repartirGasto = (movimientos: Movimiento[], top = 5): Reparto => {
     rebanadas: cabeza.map(([categoria, monto]) => ({ categoria, monto, porcentaje: porcentaje(monto) })),
     otros:
       cola.length > 0
-        ? { monto: montoOtros, porcentaje: porcentaje(montoOtros), categorias: cola.length }
+        ? {
+            monto: montoOtros,
+            porcentaje: porcentaje(montoOtros),
+            categorias: cola.map(([categoria]) => categoria),
+          }
         : null,
     total,
   };

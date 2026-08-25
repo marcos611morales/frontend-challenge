@@ -50,9 +50,9 @@ const App = () => {
 
   const limpiar = useCallback(() => cambiarCriterios(FILTROS_INICIALES), [cambiarCriterios]);
 
-  const seleccionarCategoria = useCallback(
-    (categoria: Criterios['categoria']) =>
-      cambiarCriterios({ ...criterios, categoria, ambito: 'incluidos' }),
+  const seleccionarCategorias = useCallback(
+    (categorias: Criterios['categorias']) =>
+      cambiarCriterios({ ...criterios, categorias, ambito: 'incluidos' }),
     [cambiarCriterios, criterios],
   );
 
@@ -76,8 +76,8 @@ const App = () => {
       <div className="grid min-h-0 grid-cols-[minmax(240px,300px)_minmax(0,1fr)] gap-3">
         <GraficaCategorias
           reparto={reparto}
-          seleccion={criterios.categoria}
-          onSeleccionar={seleccionarCategoria}
+          seleccion={criterios.categorias}
+          onSeleccionar={seleccionarCategorias}
         />
 
         <section

@@ -1,4 +1,5 @@
 import type { Reparto } from '../dominio/agregar';
+import { mismasCategorias } from '../dominio/filtrar';
 import { formatearPorcentaje, formatearTotal } from '../dominio/formato';
 import type { Categoria } from '../dominio/tipos';
 
@@ -9,7 +10,7 @@ const COLOR_OTROS = 'var(--cat-otros)';
 const RADIO = 42;
 const PERIMETRO = 2 * Math.PI * RADIO;
 
-type Seleccion = Categoria | 'sin-categoria' | null;
+type Seleccion = (Categoria | null)[] | null;
 
 type Trozo = {
   clave: string;
@@ -17,8 +18,11 @@ type Trozo = {
   monto: number;
   porcentaje: number;
   color: string;
-  /** `null` en "Otros": agrupa varias categorías, así que no filtra por ninguna. */
-  filtro: Seleccion;
+  /**
+   * Las categorías que filtra esta rebanada. Una para las del top; las ocho de la cola
+   * para "Otros" —que por eso también se puede pulsar, aunque no sea una categoría real.
+   */
+  filtro: (Categoria | null)[];
   /** Largo del arco y dónde empieza, en unidades de perímetro. */
   largo: number;
   desfase: number;
@@ -33,17 +37,17 @@ const construirTrozos = (reparto: Reparto): Trozo[] => {
     monto: r.monto,
     porcentaje: r.porcentaje,
     color: COLORES[i] ?? COLOR_OTROS,
-    filtro: r.categoria ?? 'sin-categoria',
+    filtro: [r.categoria],
   }));
 
   if (reparto.otros) {
     trozos.push({
       clave: 'otros',
-      etiqueta: `Otros (${reparto.otros.categorias})`,
+      etiqueta: `Otros (${reparto.otros.categorias.length})`,
       monto: reparto.otros.monto,
       porcentaje: reparto.otros.porcentaje,
       color: COLOR_OTROS,
-      filtro: null,
+      filtro: reparto.otros.categorias,
     });
   }
 
@@ -95,7 +99,7 @@ export const GraficaCategorias = ({ reparto, seleccion, onSeleccionar }: Props) 
                 r={RADIO}
                 fill="none"
                 stroke={t.color}
-                strokeWidth={t.filtro !== null && t.filtro === seleccion ? 20 : 15}
+                strokeWidth={mismasCategorias(t.filtro, seleccion) ? 20 : 15}
                 strokeDasharray={`${t.largo} ${PERIMETRO - t.largo}`}
                 strokeDashoffset={t.desfase}
                 className="transition-[stroke-width] duration-200"
@@ -118,16 +122,21 @@ export const GraficaCategorias = ({ reparto, seleccion, onSeleccionar }: Props) 
 
       <ul className="min-h-0 flex-1 space-y-0.5 overflow-y-auto">
         {trozos.map((t) => {
-          const activo = t.filtro !== null && t.filtro === seleccion;
+          const activo = mismasCategorias(t.filtro, seleccion);
+          const varias = t.filtro.length > 1;
 
           return (
             <li key={t.clave}>
               <button
                 type="button"
-                disabled={t.filtro === null}
                 aria-pressed={activo}
+                title={
+                  varias
+                    ? `Ver los movimientos de las ${t.filtro.length} categorías agrupadas`
+                    : undefined
+                }
                 onClick={() => onSeleccionar(activo ? null : t.filtro)}
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left transition-colors enabled:cursor-pointer enabled:hover:bg-superficie-suave disabled:cursor-default aria-pressed:bg-acento-suave"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left transition-colors hover:bg-superficie-suave aria-pressed:bg-acento-suave"
               >
                 <span
                   aria-hidden="true"

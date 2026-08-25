@@ -16,6 +16,25 @@ import { NOMBRE_TIPO } from './etiquetas';
  * título de una columna que no existe, que es justo lo que se está arreglando.
  */
 
+/*
+ * El `<select>` sólo sabe de un valor; el filtro es un conjunto. Estos dos centinelas
+ * viven únicamente en el DOM y se traducen aquí: el dominio nunca ve cadenas mágicas.
+ */
+const SIN_CATEGORIA = '__sin';
+const VARIAS = '__varias';
+
+const aValorSelect = (categorias: Criterios['categorias']): string => {
+  if (categorias === null) return '';
+  const [unica, ...resto] = categorias;
+  if (unica === undefined || resto.length > 0) return VARIAS;
+  return unica ?? SIN_CATEGORIA;
+};
+
+const desdeValorSelect = (valor: string): Criterios['categorias'] => {
+  if (valor === '' || valor === VARIAS) return null;
+  return [valor === SIN_CATEGORIA ? null : (valor as Categoria)];
+};
+
 const claseControl =
   'h-8 w-full min-w-0 cursor-pointer rounded-md border border-borde bg-superficie px-2 text-sm text-tinta transition-colors hover:bg-superficie-suave';
 
@@ -73,14 +92,20 @@ export const Filtros = ({ criterios, cuentas, onCambiar }: Props) => {
         <label>
           <span className="sr-only">Categoría</span>
           <select
-            value={criterios.categoria ?? ''}
-            onChange={(e) =>
-              cambiar('categoria', e.target.value === '' ? null : (e.target.value as Categoria))
-            }
+            value={aValorSelect(criterios.categorias)}
+            onChange={(e) => cambiar('categorias', desdeValorSelect(e.target.value))}
             className={claseControl}
           >
             <option value="">Categoría</option>
-            <option value="sin-categoria">Sin categoría</option>
+            {/*
+              Sólo existe mientras hay varias seleccionadas —lo que pasa al pulsar "Otros"
+              en el donut—. Sin ella el select mostraría la primera del grupo y mentiría
+              sobre lo que está filtrado. Elegir cualquier otra opción reemplaza el grupo.
+            */}
+            {aValorSelect(criterios.categorias) === VARIAS && (
+              <option value={VARIAS}>Varias ({criterios.categorias?.length})</option>
+            )}
+            <option value={SIN_CATEGORIA}>Sin categoría</option>
             {CATEGORIAS.map((c) => (
               <option key={c} value={c}>
                 {c}

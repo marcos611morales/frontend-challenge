@@ -18,7 +18,15 @@ export type Tipo = (typeof TIPOS)[number];
 /** `null` significa "sin filtrar por este campo", no "sin valor". */
 export type Filtros = {
   busqueda: string;
-  categoria: Categoria | 'sin-categoria' | null;
+  /**
+   * `null` = sin filtrar. Un arreglo filtra a esas categorías, y un `null` DENTRO del
+   * arreglo es "Sin categoría" — el mismo `null` que usa el dominio, sin cadena mágica
+   * de por medio.
+   *
+   * Es un conjunto y no un valor suelto porque el donut agrupa la cola en "Otros", y
+   * pulsar esa rebanada tiene que poder filtrar por las ocho categorías de golpe.
+   */
+  categorias: (Categoria | null)[] | null;
   tipo: Tipo;
   cuenta: string | 'sin-cuenta' | null;
   estado: Estado | null;
@@ -27,7 +35,7 @@ export type Filtros = {
 
 export const FILTROS_INICIALES: Filtros = {
   busqueda: '',
-  categoria: null,
+  categorias: null,
   tipo: 'todos',
   cuenta: null,
   estado: null,
@@ -36,7 +44,7 @@ export const FILTROS_INICIALES: Filtros = {
 
 export const hayFiltrosActivos = (f: Filtros): boolean =>
   f.busqueda.trim() !== '' ||
-  f.categoria !== null ||
+  f.categorias !== null ||
   f.tipo !== 'todos' ||
   f.cuenta !== null ||
   f.estado !== null ||
@@ -68,10 +76,7 @@ export const filtrar = (movimientos: Movimiento[], f: Filtros): Movimiento[] =>
     if (f.tipo === 'ingreso' && m.monto <= 0) return false;
     if (f.tipo === 'gasto' && m.monto >= 0) return false;
 
-    if (f.categoria !== null) {
-      const objetivo = f.categoria === 'sin-categoria' ? null : f.categoria;
-      if (m.categoria !== objetivo) return false;
-    }
+    if (f.categorias !== null && !f.categorias.includes(m.categoria)) return false;
 
     if (f.cuenta !== null) {
       const objetivo = f.cuenta === 'sin-cuenta' ? null : f.cuenta;
@@ -109,6 +114,16 @@ export const paginar = <T>(items: T[], pagina: number, tamano: number): Pagina<T
     desde: visibles.length === 0 ? 0 : inicio + 1,
     hasta: inicio + visibles.length,
   };
+};
+
+/** Dos conjuntos de categorías son el mismo filtro aunque vengan en distinto orden. */
+export const mismasCategorias = (
+  a: (Categoria | null)[] | null,
+  b: (Categoria | null)[] | null,
+): boolean => {
+  if (a === null || b === null) return a === b;
+  if (a.length !== b.length) return false;
+  return a.every((c) => b.includes(c));
 };
 
 /** Las cuentas que existen en los datos. No se escriben a mano en ningún `<select>`. */
