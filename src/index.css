@@ -1,14 +1,118 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens semánticos, no colores sueltos.
+ *
+ * Se declaran como variables CSS normales para que el modo oscuro sólo tenga que
+ * redefinirlas, y se exponen a Tailwind con `@theme inline` — que emite las utilidades
+ * apuntando a la variable en vez de al valor resuelto. Sin `inline`, `bg-superficie`
+ * quedaría congelado en el color claro y el modo oscuro no haría nada.
+ */
+
 :root {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
   color-scheme: light dark;
+
+  --lienzo: #f1f5f9;
+  --superficie: #ffffff;
+  --superficie-suave: #f8fafc;
+  --borde: #e2e8f0;
+  --tinta: #0f172a;
+  --tinta-suave: #64748b;
+  --tinta-tenue: #94a3b8;
+  --acento: #b45309;
+  --acento-suave: #fef3c7;
+
+  /* Verde y rojo nunca van solos: siempre acompañan a un signo (+ / −). */
+  --ingreso: #047857;
+  --gasto: #be123c;
+
+  /* Las 6 rebanadas del donut. Cualitativas, legibles en ambos temas. */
+  --cat-1: #4f46e5;
+  --cat-2: #0d9488;
+  --cat-3: #d97706;
+  --cat-4: #e11d48;
+  --cat-5: #0284c7;
+  --cat-otros: #94a3b8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --lienzo: #0b1220;
+    --superficie: #151e2e;
+    --superficie-suave: #1c2739;
+    --borde: #2a3648;
+    --tinta: #f1f5f9;
+    --tinta-suave: #94a3b8;
+    --tinta-tenue: #64748b;
+    --acento: #fbbf24;
+    --acento-suave: #3a2c10;
+
+    --ingreso: #34d399;
+    --gasto: #fb7185;
+
+    --cat-1: #818cf8;
+    --cat-2: #2dd4bf;
+    --cat-3: #fbbf24;
+    --cat-4: #fb7185;
+    --cat-5: #38bdf8;
+    --cat-otros: #64748b;
+  }
+}
+
+@theme inline {
+  --color-lienzo: var(--lienzo);
+  --color-superficie: var(--superficie);
+  --color-superficie-suave: var(--superficie-suave);
+  --color-borde: var(--borde);
+  --color-tinta: var(--tinta);
+  --color-tinta-suave: var(--tinta-suave);
+  --color-tinta-tenue: var(--tinta-tenue);
+  --color-acento: var(--acento);
+  --color-acento-suave: var(--acento-suave);
+  --color-ingreso: var(--ingreso);
+  --color-gasto: var(--gasto);
+
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  min-height: 100dvh;
+  /* El scroll de página no existe en este dashboard: sólo la lista scrollea, y sólo
+     cuando su contenido no cabe. */
+  overflow: hidden;
+  background: var(--lienzo);
+  color: var(--tinta);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Los montos viven en columna: sin cifras de ancho fijo, los decimales bailan. */
+.cifras {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
