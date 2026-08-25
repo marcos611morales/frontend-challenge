@@ -9,8 +9,6 @@
 - Fuera la comparativa entre meses y toda serie de tiempo: hay un solo mes, 21 días con
   actividad. Un sparkline de 21 puntos decora, no informa.
 - Fuera presupuestos y proyecciones: exigen supuestos que nadie me dio.
-- El tamaño de página se mide del alto disponible, no es constante: así "sin scroll" se
-  cumple en cualquier pantalla, no sólo en la mía.
 
 ## Supuestos que tuve que inventar
 
@@ -42,12 +40,28 @@
 
 ## Cómo usé IA
 
-- ‹pendiente: Marcos›
+## Cómo usé IA
+
+- Empecé por el contexto, no por el código: le di RETO.md y los 61 movimientos a Claude Code
+  para producir un `CLAUDE.md` con el alcance, el invariante numérico y una regla dura — si el
+  enunciado no lo dice, se pregunta; no se infiere.
+- Lo repetible lo volví skills del repo (`dominio-primero`, `decisiones`) en vez de reescribir
+  las mismas instrucciones en cada prompt. La UI la apoyé en `ui-ux-pro-max`.
+- Le pedí un plan de ejecución, lo revisé y recorté antes de ejecutarlo. Los 25 hallazgos de
+  datos los decidí uno por uno.
 
 ## Qué haría con una semana más
 
-- ‹pendiente: se llena con lo que el time-box corte, no antes›
+## Qué haría con una semana más
+
+- Tests sobre `dominio/`: es el único código donde un bug no truena nada, solo produce un
+  número equivocado en silencio. El invariante que hoy verifico a mano (52 de 61, gasto
+  $84,230.15) es el primer test, no un ejercicio nuevo.
+- Móvil: el tamaño de página se calcula del alto y el layout es una grid de `100dvh`; en
+  pantalla angosta hay que apilar donut y lista. Fuera porque `RETO.md` dice que no se evalúa.
+
 
 ## Tiempo invertido
 
-- ‹pendiente: Marcos›
+- 3 h 30 de las 4 h: 1 h de análisis de `movimientos.json`, 45 min de contexto y plan, 1 h 30
+  de ejecución, 15 min de deploy. Poner el análisis por delante es lo que abarató la ejecución.
