@@ -17,8 +17,9 @@
   --superficie-suave: #f8fafc;
   --borde: #e2e8f0;
   --tinta: #0f172a;
-  --tinta-suave: #64748b;
-  --tinta-tenue: #94a3b8;
+  /* slate-600, no slate-500: sobre --lienzo el 500 se queda en 4.34:1 y no llega a 4.5. */
+  --tinta-suave: #475569;
+  --tinta-tenue: #64748b;
   --acento: #b45309;
   --acento-suave: #fef3c7;
 
@@ -32,7 +33,9 @@
   --cat-3: #d97706;
   --cat-4: #e11d48;
   --cat-5: #0284c7;
-  --cat-otros: #94a3b8;
+  /* slate-500: el 400 daba 2.56:1 contra la tarjeta blanca y una rebanada es un
+     objeto gráfico — mínimo 3:1, igual que un icono. */
+  --cat-otros: #64748b;
 }
 
 @media (prefers-color-scheme: dark) {
