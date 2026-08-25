@@ -2,6 +2,7 @@ import { formatearDia, formatearMonto } from '../dominio/formato';
 import type { Categoria, Movimiento } from '../dominio/tipos';
 import { CATEGORIAS } from '../dominio/tipos';
 import { NOMBRE_ESTADO, NOMBRE_MOTIVO } from './etiquetas';
+import { COLUMNAS } from './columnas';
 
 /**
  * Alto fijo por renglón. Es lo que le permite a `useFilasVisibles` calcular cuántos caben,
@@ -9,27 +10,6 @@ import { NOMBRE_ESTADO, NOMBRE_MOTIVO } from './etiquetas';
  * se ajusta sola.
  */
 export const ALTURA_FILA = 40;
-
-/**
- * El ancho de cada columna, declarado una sola vez.
- *
- * Va en un `<colgroup>` y no en clases `w-*` sobre los `<td>` porque con
- * `table-layout: fixed` el navegador ignora el `width` de las celdas y reparte el ancho
- * en partes iguales — comprobado: con las clases las cinco columnas medían 220px cada
- * una, con `<colgroup>` miden lo que dicen. Además el ancho queda declarado en un solo
- * lugar en vez de repetido en el primer renglón.
- *
- * `null` = la columna que absorbe el resto. Sólo puede haber una.
- */
-const COLUMNAS: (string | null)[] = ['4rem', null, '9rem', '11rem', '8rem'];
-
-const Columnas = () => (
-  <colgroup>
-    {COLUMNAS.map((ancho, i) => (
-      <col key={i} style={ancho === null ? undefined : { width: ancho }} />
-    ))}
-  </colgroup>
-);
 
 /** Lápiz de Lucide. Un glifo de texto (✎) hereda la fuente y se ve distinto en cada SO. */
 const IconoCorregido = () => (
@@ -158,7 +138,11 @@ export const ListaMovimientos = ({ movimientos, correcciones, onCorregir }: Prop
   return (
     <table className="w-full table-fixed border-collapse">
       <caption className="sr-only">Movimientos del periodo</caption>
-      <Columnas />
+      <colgroup>
+        {COLUMNAS.map((c) => (
+          <col key={c.clave} style={c.ancho === null ? undefined : { width: c.ancho }} />
+        ))}
+      </colgroup>
       <tbody>
         {movimientos.map((m) => (
           <Renglon

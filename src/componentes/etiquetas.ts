@@ -19,8 +19,9 @@ export const NOMBRE_AMBITO: Record<Ambito, string> = {
   todos: 'Todos',
 };
 
+/* `todos` dice "Monto" porque en reposo este select es el encabezado de esa columna. */
 export const NOMBRE_TIPO: Record<Tipo, string> = {
-  todos: 'Ingresos y gastos',
+  todos: 'Monto',
   ingreso: 'Solo ingresos',
   gasto: 'Solo gastos',
 };

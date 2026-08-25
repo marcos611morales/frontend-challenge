@@ -48,10 +48,7 @@ const App = () => {
     setPagina(1);
   }, []);
 
-  const verExcluidos = useCallback(
-    () => cambiarCriterios({ ...FILTROS_INICIALES, ambito: 'excluidos' }),
-    [cambiarCriterios],
-  );
+  const limpiar = useCallback(() => cambiarCriterios(FILTROS_INICIALES), [cambiarCriterios]);
 
   const seleccionarCategoria = useCallback(
     (categoria: Criterios['categoria']) =>
@@ -65,8 +62,11 @@ const App = () => {
         periodo={periodo}
         resumen={resumen}
         correcciones={Object.keys(correcciones).length}
+        criterios={criterios}
         tema={tema}
-        onVerExcluidos={verExcluidos}
+        hayFiltros={hayFiltrosActivos(criterios)}
+        onCambiarCriterios={cambiarCriterios}
+        onLimpiar={limpiar}
         onRestaurar={restaurar}
         onAlternarTema={alternarTema}
       />
@@ -84,13 +84,7 @@ const App = () => {
           aria-label="Movimientos"
           className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] rounded-xl border border-borde bg-superficie transition-colors"
         >
-          <Filtros
-            criterios={criterios}
-            cuentas={cuentas}
-            onCambiar={cambiarCriterios}
-            onLimpiar={() => cambiarCriterios(FILTROS_INICIALES)}
-            hayFiltros={hayFiltrosActivos(criterios)}
-          />
+          <Filtros criterios={criterios} cuentas={cuentas} onCambiar={cambiarCriterios} />
 
           {/* El único elemento de la pantalla que puede scrollear, y sólo si no cabe. */}
           <div ref={refPanel} className="min-h-0 overflow-y-auto">
