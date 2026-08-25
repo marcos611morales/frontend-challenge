@@ -10,6 +10,27 @@ import { NOMBRE_ESTADO, NOMBRE_MOTIVO } from './etiquetas';
  */
 export const ALTURA_FILA = 40;
 
+/**
+ * El ancho de cada columna, declarado una sola vez.
+ *
+ * Va en un `<colgroup>` y no en clases `w-*` sobre los `<td>` porque con
+ * `table-layout: fixed` el navegador ignora el `width` de las celdas y reparte el ancho
+ * en partes iguales — comprobado: con las clases las cinco columnas medían 220px cada
+ * una, con `<colgroup>` miden lo que dicen. Además el ancho queda declarado en un solo
+ * lugar en vez de repetido en el primer renglón.
+ *
+ * `null` = la columna que absorbe el resto. Sólo puede haber una.
+ */
+const COLUMNAS: (string | null)[] = ['4rem', null, '9rem', '11rem', '8rem'];
+
+const Columnas = () => (
+  <colgroup>
+    {COLUMNAS.map((ancho, i) => (
+      <col key={i} style={ancho === null ? undefined : { width: ancho }} />
+    ))}
+  </colgroup>
+);
+
 /** Lápiz de Lucide. Un glifo de texto (✎) hereda la fuente y se ve distinto en cada SO. */
 const IconoCorregido = () => (
   <svg
@@ -58,7 +79,7 @@ const Renglon = ({ movimiento: m, onCorregir, corregido }: PropsRenglon) => {
     style={{ height: ALTURA_FILA }}
     className={`border-b border-borde last:border-0 ${m.excluido ? 'opacity-55' : ''}`}
   >
-    <td className="cifras w-16 whitespace-nowrap pl-3 pr-2 text-xs text-tinta-suave">
+    <td className="cifras whitespace-nowrap pl-3 pr-2 text-xs text-tinta-suave">
       {formatearDia(m.fecha)}
     </td>
 
@@ -72,7 +93,20 @@ const Renglon = ({ movimiento: m, onCorregir, corregido }: PropsRenglon) => {
       </div>
     </td>
 
-    <td className="w-44 pr-2">
+    <td className="pr-2">
+      {m.cuenta === null ? (
+        <span className="text-xs text-tinta-tenue" title="El agregador no reportó la cuenta">
+          Sin cuenta
+        </span>
+      ) : (
+        /* `cifras` alinea los cuatro dígitos finales en columna; sin eso bailan. */
+        <span className="cifras truncate text-xs text-tinta-suave" title={m.cuenta}>
+          {m.cuenta}
+        </span>
+      )}
+    </td>
+
+    <td className="pr-2">
       <div className="flex items-center gap-1">
         <select
           value={m.categoria ?? ''}
@@ -96,7 +130,7 @@ const Renglon = ({ movimiento: m, onCorregir, corregido }: PropsRenglon) => {
     </td>
 
     <td
-      className={`cifras w-32 whitespace-nowrap pr-3 text-right text-sm font-medium ${
+      className={`cifras whitespace-nowrap pr-3 text-right text-sm font-medium ${
         m.monto > 0 ? 'text-ingreso' : 'text-tinta'
       }`}
     >
@@ -124,6 +158,7 @@ export const ListaMovimientos = ({ movimientos, correcciones, onCorregir }: Prop
   return (
     <table className="w-full table-fixed border-collapse">
       <caption className="sr-only">Movimientos del periodo</caption>
+      <Columnas />
       <tbody>
         {movimientos.map((m) => (
           <Renglon
